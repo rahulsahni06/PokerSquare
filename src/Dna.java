@@ -28,27 +28,36 @@ public class Dna {
 
     public Dna crossOver(Dna partner) {
         Card[][] child = new Card[PokerSquares.SIZE][PokerSquares.SIZE];
-        int random = new Random().nextInt(2);
-
-        UniqueStack<CardPos> childStack = new UniqueStack<>();
-
+        
         for(int i = 0; i < PokerSquares.SIZE; i++) {
             for(int j = 0; j < PokerSquares.SIZE; j++) {
+                int random = new Random().nextInt(2);
                 if(random == 0) {
-                    childStack.push(new CardPos(i, j, this.cards[i][j]));
+                    if(alreadyPlaced(child, this.cards[i][j])) 
+                        child[i][j] = partner.cards[i][j];
+                    else
+                        child[i][j] = this.cards[i][j];
                 } else {
-                    childStack.push(new CardPos(i, j, partner.cards[i][j]));
+                    if(alreadyPlaced(child, partner.cards[i][j]))
+                        child[i][j] = this.cards[i][j];
+                    else
+                        child[i][j] = partner.cards[i][j];
                 }
-
             }
         }
 
-        while (childStack.getSize() > 0) {
-            CardPos cardPos = childStack.pop();
-            child[cardPos.rowPos][cardPos.colPos] = cardPos.card;
-        }
-
         return new Dna(child);
+    }
+
+    public boolean alreadyPlaced(Card[][] child, Card card) {
+        for(int i = 0; i < child.length; i++) {
+            for(int j = 0; j < child.length; j++) {
+                if(child[i][j] == card) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public Dna mutate(float mutationRate) {
