@@ -1,0 +1,168 @@
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Stack;
+
+/**
+ * FlushPlayer - a simple example implementation of the player interface for PokerSquares that
+ * attempts to get flushes in the first four columns.
+ * Author: ________, based on code provided by Todd W. Neller and Michael Fleming
+ */
+public class GeneticPlayer implements PokerSquaresPlayer {
+
+    private final int SIZE = 5; // number of rows/columns in square grid
+    private final int NUM_POS = SIZE * SIZE; // number of positions in square grid
+    private final int NUM_CARDS = Card.NUM_CARDS; // number of cards in deck
+    private Card[][] grid = new Card[SIZE][SIZE]; // grid with Card objects or null (for empty positions)
+
+    private boolean isFirstTime = true;
+    private int generations = 0;
+    private PokerSquaresPointSystem pokerSquaresPointSystem;
+
+    private Stack<Integer> plays = new Stack<Integer>();
+    int row = 0;
+    int col = 0;
+
+    /**
+     * To keep track of empty spaces in grid
+     */
+    private final int[][] emptyGrid = new int[SIZE][SIZE];
+
+    /**
+     * Constant to indicate cell is empty
+     */
+    private static final int CELL_EMPTY = 0;
+
+    /**
+     * Constant to indicate cell is filled
+     */
+    private static final int CELL_FILLED = 1;
+
+
+    /* (non-Javadoc)
+     * @see PokerSquaresPlayer#setPointSystem(PokerSquaresPointSystem, long)
+     */
+    @Override
+    public void setPointSystem(PokerSquaresPointSystem system, long millis) {
+        this.pokerSquaresPointSystem = system;
+        // The FlushPlayer, like the RandomPlayer, does not worry about the scoring system.
+    }
+
+    /* (non-Javadoc)
+     * @see PokerSquaresPlayer#init()
+     */
+    @Override
+    public void init() {
+        // clear grid
+        for (int row = 0; row < SIZE; row++) {
+            for (int col = 0; col < SIZE; col++) {
+                grid[row][col] = null;
+
+                //marking all cells as empty
+                emptyGrid[row][col] = CELL_EMPTY;
+            }
+        }
+
+        plays.clear();
+//        for (int i = 0; i < 25; i++)
+//            plays.push(i);
+
+        for (int i = 24; i >= 0; i--)
+            plays.push(i);
+//        Collections.shuffle(plays);
+    }
+
+    @Override
+    public int[] getPlay(Card card, long millisRemaining) {
+        return new int[0];
+    }
+
+    /* (non-Javadoc)
+     * @see PokerSquaresPlayer#getPlay(Card, long)
+     */
+    public int[] getPlay(Card card, long millisRemaining, Stack<Card> deck) {
+
+        if(isFirstTime) {
+            isFirstTime = false;
+
+            Stack<Card> copiedDeck = new Stack<Card>();
+            copiedDeck.addAll(deck);
+//            Iterator<Card> deckIterator = deck.iterator();
+
+
+            Card[][] cards = new Card[SIZE][SIZE];
+            cards[0][0] = card;
+            for(int i = 0; i<SIZE; i++) {
+                for(int j = 0; j<SIZE; j++) {
+                   if(i == 0 && j == 0) {
+                       continue;
+                   }
+//                   cards[i][j] = deckIterator.next();
+                   cards[i][j] = copiedDeck.pop();
+                }
+            }
+
+//            pokerSquaresPointSystem.printGrid(cards);
+//
+//            int score = pokerSquaresPointSystem.getScore(cards);
+//            System.out.println("initial"+": "+score);
+
+
+
+            Population population = new Population(2000, 0.1f, cards);
+//            pokerSquaresPointSystem.printGrid(population.getPopulation());
+
+            while(generations <= 10000) {
+                generations++;
+
+                population.calculateFitness(pokerSquaresPointSystem);
+                population.generate();
+                System.out.println("Generation: "+generations);
+                int i = 1;
+                for(Dna newChild : population.getPopulation()) {
+                    int score = pokerSquaresPointSystem.getScore(newChild.getCards());
+                    System.out.println(""+i+": "+score);
+                    i++;
+                }
+                System.out.println("\n");
+
+                if(generations == 1) {
+                    for(i = 0; i<10; i++) {
+                        pokerSquaresPointSystem.printGrid(population.getChild(i));
+                    }
+                }
+            }
+
+            int index = population.getBestFit(pokerSquaresPointSystem);
+            pokerSquaresPointSystem.printGrid(population.getChild(index));
+//            for(int i = 0; i<10; i++) {
+//                pokerSquaresPointSystem.printGrid(population.getChild(i));
+//            }
+        }
+
+        int play = plays.pop(); // get the next random position for play
+        int[] playPos = {play / 5, play % 5}; // decode it into row and column
+//        row++;
+//        col++;
+        return playPos;
+
+    }
+
+    /* (non-Javadoc)
+     * @see PokerSquaresPlayer#getName()
+     */
+    @Override
+    public String getName() {
+        return "FlushPlayer";
+    }
+
+    /**
+     * Demonstrate FlushPlayer play with British point system.
+     * @param args (not used)
+     */
+    public static void main(String[] args) {
+        PokerSquaresPointSystem system = PokerSquaresPointSystem.getBritishPointSystem();
+        System.out.println(system);
+        new PokerSquares(new GeneticPlayer(), system).play(); // play a single game
+    }
+
+}
