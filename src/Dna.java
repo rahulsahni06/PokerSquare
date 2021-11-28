@@ -1,6 +1,8 @@
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Random;
 
 public class Dna {
@@ -28,20 +30,24 @@ public class Dna {
         Card[][] child = new Card[PokerSquares.SIZE][PokerSquares.SIZE];
         int random = new Random().nextInt(2);
 
-        HashMap<String, Integer> map = new HashMap<>();
+        UniqueStack<CardPos> childStack = new UniqueStack<>();
 
-        for(int i = 0; i<PokerSquares.SIZE; i++) {
-            for(int j = 0; j<PokerSquares.SIZE; j++) {
-//                map.put(this.cards[i][j].toString(), i*PokerSquares.SIZE+j);
-//                map.put(this.cards[i][j].toString(), i*PokerSquares.SIZE+j);
+        for(int i = 0; i < PokerSquares.SIZE; i++) {
+            for(int j = 0; j < PokerSquares.SIZE; j++) {
                 if(random == 0) {
-                    child[i][j] = this.cards[i][j];
+                    childStack.push(new CardPos(i, j, this.cards[i][j]));
                 } else {
-                    child[i][j] = partner.cards[i][j];
+                    childStack.push(new CardPos(i, j, partner.cards[i][j]));
                 }
 
             }
         }
+
+        while (childStack.getSize() > 0) {
+            CardPos cardPos = childStack.pop();
+            child[cardPos.rowPos][cardPos.colPos] = cardPos.card;
+        }
+
         return new Dna(child);
     }
 
