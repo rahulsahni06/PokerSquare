@@ -33,15 +33,42 @@ public class Dna {
             for(int j = 0; j < PokerSquares.SIZE; j++) {
                 int random = new Random().nextInt(2);
                 if(random == 0) {
-                    if(alreadyPlaced(child, this.cards[i][j])) 
-                        child[i][j] = partner.cards[i][j];
-                    else
+                    if (!alreadyPlaced(child, this.cards[i][j]))
                         child[i][j] = this.cards[i][j];
+                    else if (!alreadyPlaced(child, partner.cards[i][j]))
+                        child[i][j] = partner.cards[i][j];
+                     else {
+                        // cards from both partners at this position already placed
+                        boolean randomCardPlaced = false;
+                        while (!randomCardPlaced) {
+                            int r1 = new Random().nextInt(5);
+                            int r2 = new Random().nextInt(5);
+                            Card randomCard = this.cards[r1][r2];
+                            if (!alreadyPlaced(child, randomCard)) {
+                                child[i][j] = randomCard;
+                                randomCardPlaced = true;
+                            } 
+                        }
+                    }
+                        
                 } else {
-                    if(alreadyPlaced(child, partner.cards[i][j]))
-                        child[i][j] = this.cards[i][j];
-                    else
+                    if (!alreadyPlaced(child, partner.cards[i][j]))
                         child[i][j] = partner.cards[i][j];
+                    else if (!alreadyPlaced(child, this.cards[i][j]))
+                        child[i][j] = this.cards[i][j];
+                     else {
+                        // cards from both partners at this position already placed
+                        boolean randomCardPlaced = false;
+                        while (!randomCardPlaced) {
+                            int r1 = new Random().nextInt(5);
+                            int r2 = new Random().nextInt(5);
+                            Card randomCard = partner.cards[r1][r2];
+                            if (!alreadyPlaced(child, randomCard)) {
+                                child[i][j] = randomCard;
+                                randomCardPlaced = true;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -50,9 +77,9 @@ public class Dna {
     }
 
     public boolean alreadyPlaced(Card[][] child, Card card) {
-        for(int i = 0; i < child.length; i++) {
-            for(int j = 0; j < child.length; j++) {
-                if(child[i][j] == card) {
+        for(int i = 0; i < PokerSquares.SIZE; i++) {
+            for(int j = 0; j < PokerSquares.SIZE; j++) {
+                if(child[i][j] != null && child[i][j].equals(card)) {
                     return true;
                 }
             }

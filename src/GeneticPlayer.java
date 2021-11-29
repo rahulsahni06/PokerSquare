@@ -108,7 +108,7 @@ public class GeneticPlayer implements PokerSquaresPlayer {
 
 
 
-            Population population = new Population(500, 0.2f, cards);
+            Population population = new Population(300, 0.2f, cards);
 //            pokerSquaresPointSystem.printGrid(population.getPopulation());
 
             while(generations <= 100) {
