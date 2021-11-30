@@ -23,7 +23,7 @@ public class Dna {
 
     public void calculateFitness(PokerSquaresPointSystem system) {
         int score = system.getScore(cards);
-        fitness = Math.pow(score/128d, 2);
+        fitness = Math.pow(score/113d, 2);
     }
 
     public Dna crossOver(Dna partner) {
