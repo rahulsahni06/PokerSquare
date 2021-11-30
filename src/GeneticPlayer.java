@@ -1,4 +1,5 @@
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Stack;
 
@@ -37,6 +38,8 @@ public class GeneticPlayer implements PokerSquaresPlayer {
      */
     private static final int CELL_FILLED = 1;
 
+    private final HashMap<Card, Integer> bestChildMap = new HashMap<>();
+
 
     /* (non-Javadoc)
      * @see PokerSquaresPlayer#setPointSystem(PokerSquaresPointSystem, long)
@@ -69,6 +72,8 @@ public class GeneticPlayer implements PokerSquaresPlayer {
         for (int i = 24; i >= 0; i--)
             plays.push(i);
 //        Collections.shuffle(plays);
+        bestChildMap.clear();
+        isFirstTime = true;
     }
 
     @Override
@@ -108,43 +113,52 @@ public class GeneticPlayer implements PokerSquaresPlayer {
 
 
 
-            Population population = new Population(300, 0.2f, cards);
+            Population population = new Population(500, 0.1f, cards);
 //            pokerSquaresPointSystem.printGrid(population.getPopulation());
 
-            while(generations <= 100) {
+            while(generations <= 500) {
                 generations++;
 
                 population.calculateFitness(pokerSquaresPointSystem);
                 population.generate();
-                System.out.println("Generation: "+generations);
-                int i = 1;
-                for(Dna newChild : population.getPopulation()) {
-                    int score = pokerSquaresPointSystem.getScore(newChild.getCards());
-                    System.out.println(""+i+": "+score);
-                    i++;
-                }
-                System.out.println("\n");
 
-                if(generations == 1) {
-                    for(i = 0; i<10; i++) {
-                        pokerSquaresPointSystem.printGrid(population.getChild(i));
-                    }
-                }
+//                System.out.println("Generation: "+generations);
+//                int i = 1;
+//                for(Dna newChild : population.getPopulation()) {
+//                    int score = pokerSquaresPointSystem.getScore(newChild.getCards());
+//                    System.out.println(""+i+": "+score);
+//                    i++;
+//                }
+//                System.out.println("\n");
+//
+//                if(generations == 1) {
+//                    for(i = 0; i<10; i++) {
+//                        pokerSquaresPointSystem.printGrid(population.getChild(i));
+//                    }
+//                }
             }
 
             int index = population.getBestFit(pokerSquaresPointSystem);
-            pokerSquaresPointSystem.printGrid(population.getChild(index));
+            saveBestChild(population.getChild(index));
+//            pokerSquaresPointSystem.printGrid(population.getChild(index));
 //            for(int i = 0; i<10; i++) {
 //                pokerSquaresPointSystem.printGrid(population.getChild(i));
 //            }
         }
 
-        int play = plays.pop(); // get the next random position for play
-        int[] playPos = {play / 5, play % 5}; // decode it into row and column
-//        row++;
-//        col++;
-        return playPos;
+//        int play = plays.pop(); // get the next random position for play
+        int rowMajorPos = bestChildMap.get(card);
+        return new int[]{rowMajorPos / 5, rowMajorPos % 5};
 
+    }
+
+
+    private void saveBestChild(Card[][] child) {
+        for(int i = 0; i < PokerSquares.SIZE; i++) {
+            for(int j = 0; j < PokerSquares.SIZE; j++) {
+                bestChildMap.put(child[i][j], i * SIZE + j);
+            }
+        }
     }
 
     /* (non-Javadoc)
@@ -152,7 +166,7 @@ public class GeneticPlayer implements PokerSquaresPlayer {
      */
     @Override
     public String getName() {
-        return "FlushPlayer";
+        return "GeneticPlayer";
     }
 
     /**
