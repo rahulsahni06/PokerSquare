@@ -11,32 +11,12 @@ import java.util.Stack;
 public class GeneticPlayer implements PokerSquaresPlayer {
 
     private final int SIZE = 5; // number of rows/columns in square grid
-    private final int NUM_POS = SIZE * SIZE; // number of positions in square grid
-    private final int NUM_CARDS = Card.NUM_CARDS; // number of cards in deck
     private Card[][] grid = new Card[SIZE][SIZE]; // grid with Card objects or null (for empty positions)
 
     private boolean isFirstTime = true;
     private int generations = 0;
     private PokerSquaresPointSystem pokerSquaresPointSystem;
 
-    private Stack<Integer> plays = new Stack<Integer>();
-    int row = 0;
-    int col = 0;
-
-    /**
-     * To keep track of empty spaces in grid
-     */
-    private final int[][] emptyGrid = new int[SIZE][SIZE];
-
-    /**
-     * Constant to indicate cell is empty
-     */
-    private static final int CELL_EMPTY = 0;
-
-    /**
-     * Constant to indicate cell is filled
-     */
-    private static final int CELL_FILLED = 1;
 
     private final HashMap<Card, Integer> bestChildMap = new HashMap<>();
 
@@ -59,19 +39,9 @@ public class GeneticPlayer implements PokerSquaresPlayer {
         for (int row = 0; row < SIZE; row++) {
             for (int col = 0; col < SIZE; col++) {
                 grid[row][col] = null;
-
-                //marking all cells as empty
-                emptyGrid[row][col] = CELL_EMPTY;
             }
         }
 
-        plays.clear();
-//        for (int i = 0; i < 25; i++)
-//            plays.push(i);
-
-        for (int i = 24; i >= 0; i--)
-            plays.push(i);
-//        Collections.shuffle(plays);
         bestChildMap.clear();
         isFirstTime = true;
     }
@@ -176,7 +146,22 @@ public class GeneticPlayer implements PokerSquaresPlayer {
     public static void main(String[] args) {
         PokerSquaresPointSystem system = PokerSquaresPointSystem.getBritishPointSystem();
         System.out.println(system);
+        GeneticPlayer gp = new GeneticPlayer();
+//        new PokerSquares(gp, system).play(); // play a single game
         new PokerSquares(new GeneticPlayer(), system).play(); // play a single game
+        new PokerSquares(new GeneticPlayer(), system).play(); // play a single game
+        new PokerSquares(new GeneticPlayer(), system).play(); // play a single game
+        new PokerSquares(new GeneticPlayer(), system).play(); // play a single game
+        new PokerSquares(new GeneticPlayer(), system).play(); // play a single game
+        new PokerSquares(new GeneticPlayer(), system).play(); // play a single game
+        new PokerSquares(new GeneticPlayer(), system).play(); // play a single game
+//        new PokerSquares(gp, system).play(); // play a single game
+//        new PokerSquares(gp, system).play(); // play a single game
+//        new PokerSquares(gp, system).play(); // play a single game
+//        new PokerSquares(gp, system).play(); // play a single game
+//        new PokerSquares(gp, system).play(); // play a single game
+//        new PokerSquares(gp, system).play(); // play a single game
+//        new PokerSquares(gp, system).play(); // play a single game
     }
 
 }
