@@ -23,7 +23,7 @@ public class Dna {
 
     public void calculateFitness(PokerSquaresPointSystem system) {
         int score = system.getScore(cards);
-        fitness = Math.pow(score/113d, 2);
+        fitness = Math.pow(score/300d, 2);
     }
 
     public Dna crossOver(Dna partner) {
@@ -90,7 +90,7 @@ public class Dna {
     public Dna mutate(float mutationRate) {
         float random = new Random().nextFloat();
         if(random <= mutationRate) {
-            return shuffle(this.cards);
+            return shuffleLimited(this.cards);
         }
         return this;
     }
@@ -118,6 +118,42 @@ public class Dna {
 
 //                shuffledCards[i][j] = cards[m][n];
 //                shuffledCards[m][n] = cards[i][j];
+            }
+        }
+        return new Dna(shuffledCards);
+    }
+
+    public static Dna shuffleLimited(Card[][] cards) {
+        Card[][] shuffledCards = new Card[cards[0].length][cards.length];
+        Random random = new Random();
+
+        for(int i = 0; i<cards.length; i++) {
+            System.arraycopy(cards[i], 0, shuffledCards[i],0, shuffledCards[i].length);
+        }
+
+        int maxShuffledElementCount = random.nextInt(23) + 2;
+        int shuffledElementCount = 0;
+
+        for (int i = cards.length - 1; i > 0; i--) {
+            for (int j = cards[i].length - 1; j > 0; j--) {
+
+                if(shuffledElementCount >= maxShuffledElementCount) {
+                    break;
+                }
+
+                int m = random.nextInt(i + 1);
+                int n = random.nextInt(j + 1);
+
+                Card temp = shuffledCards[i][j];
+                shuffledCards[i][j] = shuffledCards[m][n];
+                shuffledCards[m][n] = temp;
+
+                shuffledElementCount++;
+
+            }
+
+            if(shuffledElementCount >= maxShuffledElementCount) {
+                break;
             }
         }
         return new Dna(shuffledCards);
