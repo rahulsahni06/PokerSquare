@@ -4,6 +4,15 @@ public class Population {
 
     private Dna[] population;
     private int populationCount;
+
+    public void setMutationRate(float mutationRate) {
+        this.mutationRate = mutationRate;
+    }
+
+    public float getMutationRate() {
+        return mutationRate;
+    }
+
     private float mutationRate;
 
     private Dna bestDna;
