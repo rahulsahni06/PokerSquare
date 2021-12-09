@@ -2,7 +2,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.Stack;
 
 /* A version of the solitaire game "Poker Squares" with variable point systems.
@@ -110,8 +109,8 @@ public class PokerSquares {
 				Card card = deck.pop();
 				long startTime = System.currentTimeMillis();
 				int[] play;
-				if(player instanceof GeneticPlayer) {
-					play = ((GeneticPlayer) player).getPlay(card, millisRemaining, deck);
+				if(player instanceof RahulAmanGeneticPlayer) {
+					play = ((RahulAmanGeneticPlayer) player).getPlay(card, millisRemaining, deck);
 				} else {
 					play = player.getPlay(card, millisRemaining);
 				}
@@ -273,7 +272,7 @@ public class PokerSquares {
                 ArrayList<PokerSquaresPlayer> players = new ArrayList<PokerSquaresPlayer>();
                 players.add(new RandomMCPlayer());
 //                players.add(new FlushPlayer());
-                players.add(new GeneticPlayer());
+                players.add(new RahulAmanGeneticPlayer());
 
                 ArrayList<PokerSquaresPointSystem> systems = new ArrayList<PokerSquaresPointSystem>();
                 PokerSquaresPointSystem.setSeed(42L);
@@ -282,6 +281,6 @@ public class PokerSquares {
 //                systems.add(PokerSquaresPointSystem.getSingleHandPointSystem(PokerHand.FLUSH.id));  // 1 point for flushes, 0 for all other hands
 
 
-                PokerSquares.playTournament(players, systems, 20, 0L);  // play 20 games for each player under each scoring system
+                PokerSquares.playTournament(players, systems, 5, 0L);  // play 20 games for each player under each scoring system
 	}
 }

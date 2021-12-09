@@ -1,13 +1,13 @@
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Random;
 
-public class Dna {
+/**
+ * Class denoting one child or grid with fitness scores
+ */
+public class RahulAmanDna {
     private Card[][] cards;
     private double fitness;
+
+    private static final int MAX_SCORE = 300;
 
     public Card[][] getCards() {
         return cards;
@@ -17,16 +17,25 @@ public class Dna {
         return fitness;
     }
 
-    public Dna(Card[][] cards) {
+    public RahulAmanDna(Card[][] cards) {
         this.cards = cards;
     }
 
+    /**
+     * Calculates fitness of child
+     * @param system, PokerSquaresPointSystem
+     */
     public void calculateFitness(PokerSquaresPointSystem system) {
         int score = system.getScore(cards);
-        fitness = Math.pow(score/300d, 2);
+        fitness = Math.pow(score/((double) MAX_SCORE), 2);
     }
 
-    public Dna crossOver(Dna partner) {
+    /**
+     * Perform crossover between two parents
+     * @param partner, 2nd Parent
+     * @return Child after performing crossover
+     */
+    public RahulAmanDna crossOver(RahulAmanDna partner) {
         Card[][] child = new Card[PokerSquares.SIZE][PokerSquares.SIZE];
         
         for(int i = 0; i < PokerSquares.SIZE; i++) {
@@ -73,9 +82,16 @@ public class Dna {
             }
         }
 
-        return new Dna(child);
+        return new RahulAmanDna(child);
     }
 
+    /**
+     * Function to check if card is alread placed or not in the grid.
+     * We thought of optimizing it but ran out of time
+     * @param child, Grid where we need to check if a particular card is placed or not
+     * @param card, card we need to check if it is placed or not
+     * @return is Card id placed in the grid or not
+     */
     public boolean alreadyPlaced(Card[][] child, Card card) {
         for(int i = 0; i < PokerSquares.SIZE; i++) {
             for(int j = 0; j < PokerSquares.SIZE; j++) {
@@ -87,7 +103,12 @@ public class Dna {
         return false;
     }
 
-    public Dna mutate(float mutationRate) {
+    /**
+     * Method mutates a child by shuffling the grid positions
+     * @param mutationRate, rate at which mutation will be perfomed
+     * @return new mutated child
+     */
+    public RahulAmanDna mutate(float mutationRate) {
         float random = new Random().nextFloat();
         if(random <= mutationRate) {
             return shuffleLimited(this.cards);
@@ -95,9 +116,14 @@ public class Dna {
         return this;
     }
 
-//    Fisher–Yates algorithm
-//    https://stackoverflow.com/a/26920919/7529668
-    public static Dna shuffle(Card[][] cards) {
+    /**
+     * Shuffles card in grid
+     * Fisher Yates algorithm
+     * https://stackoverflow.com/a/26920919/7529668
+     * @param cards, grid to shuffle
+     * @return new shuffled grid
+     */
+    public static RahulAmanDna shuffle(Card[][] cards) {
         Card[][] shuffledCards = new Card[cards[0].length][cards.length];
         Random random = new Random();
 
@@ -108,7 +134,6 @@ public class Dna {
         for (int i = cards.length - 1; i > 0; i--) {
             for (int j = cards[i].length - 1; j > 0; j--) {
 
-//                shuffledCards[i][j] = cards[i][j];
                 int m = random.nextInt(i + 1);
                 int n = random.nextInt(j + 1);
 
@@ -116,14 +141,16 @@ public class Dna {
                 shuffledCards[i][j] = shuffledCards[m][n];
                 shuffledCards[m][n] = temp;
 
-//                shuffledCards[i][j] = cards[m][n];
-//                shuffledCards[m][n] = cards[i][j];
             }
         }
-        return new Dna(shuffledCards);
+        return new RahulAmanDna(shuffledCards);
     }
 
-    public static Dna shuffleLimited(Card[][] cards) {
+    /**
+     * Method mutates a child by shuffling the grid positions, it only shuffles part of the grid
+     * @return new shuffled grid
+     */
+    public static RahulAmanDna shuffleLimited(Card[][] cards) {
         Card[][] shuffledCards = new Card[cards[0].length][cards.length];
         Random random = new Random();
 
@@ -156,7 +183,7 @@ public class Dna {
                 break;
             }
         }
-        return new Dna(shuffledCards);
+        return new RahulAmanDna(shuffledCards);
     }
 
 }

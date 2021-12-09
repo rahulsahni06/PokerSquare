@@ -1,23 +1,43 @@
 import java.util.*;
 
 /**
- * FlushPlayer - a simple example implementation of the player interface for PokerSquares that
+ * RahulAmanGeneticPlayer - a Genetic algo implementation of the player interface for PokerSquares that
  * attempts to get flushes in the first four columns.
- * Author: ________, based on code provided by Todd W. Neller and Michael Fleming
+ * Author: Rahul, Aman based on code provided by Todd W. Neller and Michael Fleming
  */
-public class GeneticPlayer implements PokerSquaresPlayer {
+public class RahulAmanGeneticPlayer implements PokerSquaresPlayer {
 
     private final int SIZE = 5; // number of rows/columns in square grid
     private Card[][] grid = new Card[SIZE][SIZE]; // grid with Card objects or null (for empty positions)
-    private boolean isFirstTime = true;
-    private int generations = 0;
+
     private PokerSquaresPointSystem pokerSquaresPointSystem;
+
+    //Flag to perform genetic algorithm only once
+    private boolean isFirstTime = true;
+
+    //Keeps track of how many generations we have created
+    private int generations = 0;
+
+    //Data structure to save best-fit child from each generation
     private final HashMap<Card, Integer> bestChildMap = new HashMap<>();
+
+    //Keeps track of best child over all the generations
     private Card[][] bestChild;
+
+    //Keeps track of score of best child over all the generations
     private int bestScore = 0;
+
+    //Keeps track of generation which has the best child
     private int bestGeneration = 0;
 
     private static boolean verboseLogging = false;
+
+    private static final int POPULATION_COUNT = 500;
+    private static final int GENERATION_STUCK_LIMIT = 500;
+    private static final float INITIAL_MUTATION_RATE = 0.15f;
+    private static final float INCREASE_MUTATION_RATE = 1.25f;
+    private static final float MAX_MUTATION_RATE = 0.8f;
+    private static final float TIMEOUT = 25 * 1000;
 
     /* (non-Javadoc)
      * @see PokerSquaresPlayer#setPointSystem(PokerSquaresPointSystem, long)
@@ -50,7 +70,8 @@ public class GeneticPlayer implements PokerSquaresPlayer {
 
     @Override
     public int[] getPlay(Card card, long millisRemaining) {
-        return new int[0];
+        throw new RuntimeException("Method not supported for "+ RahulAmanGeneticPlayer.class.getName()+" player. " +
+                "Please use method getPlay(Card card, long millisRemaining, Stack<Card> deck)");
     }
 
     /* (non-Javadoc)
@@ -77,33 +98,40 @@ public class GeneticPlayer implements PokerSquaresPlayer {
                 }
             }
 
+            RahulAmanPopulation population = new RahulAmanPopulation(POPULATION_COUNT, INITIAL_MUTATION_RATE, cards);
 
-            Population population = new Population(500, 0.15f, cards);
-
-            while(System.currentTimeMillis() - startMillis < 25 * 1000) {
+            while(System.currentTimeMillis() - startMillis < TIMEOUT) {
                 generations++;
 
+                //Calculating fitness of all the children in current population
                 population.calculateFitness(pokerSquaresPointSystem);
+
+                //Generates new population after perfroming cross-over and mutation
                 population.generate();
 
+                //Get index of best fit child in current population
                 int index = population.getBestFit(pokerSquaresPointSystem);
+
+                //Get score of best fit child in current population
                 int score = pokerSquaresPointSystem.getScore(population.getChild(index));
 
                 if(verboseLogging) {
-                    System.out.println("Generation: " + generations + ": " + score);
+                    System.out.println("Generation: " + generations + ": " + score + "   mutation: "+population.getMutationRate());
                 }
 
+                //Saving best child from each generation
                 if(bestScore < score) {
                     bestScore = score;
                     bestChild = population.getChild(index);
                     bestGeneration = generations;
                     saveBestChild(bestChild);
-
                 }
-                if(score <= bestScore && generations % 500 == 0) {
-                    float newMutation = population.getMutationRate() * 1.25f;
-                    if(newMutation > 0.8) {
-                        newMutation = 0.15f;
+
+                //Change mutation rate if evolution is stuck for 500 generations
+                if(score <= bestScore && generations % GENERATION_STUCK_LIMIT == 0) {
+                    float newMutation = population.getMutationRate() * INCREASE_MUTATION_RATE;
+                    if(newMutation > MAX_MUTATION_RATE) {
+                        newMutation = INITIAL_MUTATION_RATE;
                     }
                     population.setMutationRate(newMutation);
 
@@ -116,12 +144,16 @@ public class GeneticPlayer implements PokerSquaresPlayer {
             }
         }
 
+        //Return grid position from best fit child
         int rowMajorPos = bestChildMap.get(card);
         return new int[]{rowMajorPos / 5, rowMajorPos % 5};
 
     }
 
-
+    /**
+     * Save best child from each generation
+     * @param child, child or grid to be saved
+     */
     private void saveBestChild(Card[][] child) {
         bestChildMap.clear();
         for(int i = 0; i < PokerSquares.SIZE; i++) {
@@ -140,15 +172,13 @@ public class GeneticPlayer implements PokerSquaresPlayer {
     }
 
     /**
-     * Demonstrate FlushPlayer play with British point system.
+     * Demonstrate RahulAmanGeneticPlayer play with British point system.
      * @param args (not used)
      */
     public static void main(String[] args) {
         PokerSquaresPointSystem system = PokerSquaresPointSystem.getBritishPointSystem();
         System.out.println(system);
-        GeneticPlayer gp = new GeneticPlayer();
-
-        verboseLogging = true;
+        RahulAmanGeneticPlayer gp = new RahulAmanGeneticPlayer();
 
         int gameCount = 1;
         int[] scores = new int[gameCount];
