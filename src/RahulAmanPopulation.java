@@ -67,14 +67,18 @@ public class RahulAmanPopulation {
      */
     public RahulAmanDna acceptReject(double maxFitness) {
         Random random = new Random();
-        while (true) {
+        int i = 0;
+        while (i < 30000) {
             int randomIndex = random.nextInt(this.population.length);
             RahulAmanDna partnerDna = this.population[randomIndex];
             double randomFitnessMeasure = maxFitness * random.nextDouble();
             if(partnerDna.getFitness() > randomFitnessMeasure) {
                 return partnerDna;
             }
+            i++;
         }
+        int randomIndex = random.nextInt(this.population.length);
+        return this.population[randomIndex];
     }
 
     /**

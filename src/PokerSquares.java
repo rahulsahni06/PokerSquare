@@ -110,7 +110,7 @@ public class PokerSquares {
 				long startTime = System.currentTimeMillis();
 				int[] play;
 				if(player instanceof RahulAmanGeneticPlayer) {
-					play = ((RahulAmanGeneticPlayer) player).getPlay(card, millisRemaining, deck);
+					play = ((RahulAmanGeneticPlayer) player).getPlay(card, millisRemaining);
 				} else {
 					play = player.getPlay(card, millisRemaining);
 				}
@@ -281,6 +281,6 @@ public class PokerSquares {
 //                systems.add(PokerSquaresPointSystem.getSingleHandPointSystem(PokerHand.FLUSH.id));  // 1 point for flushes, 0 for all other hands
 
 
-                PokerSquares.playTournament(players, systems, 5, 0L);  // play 20 games for each player under each scoring system
+                PokerSquares.playTournament(players, systems, 20, 0L);  // play 20 games for each player under each scoring system
 	}
 }
