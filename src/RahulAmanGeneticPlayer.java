@@ -20,6 +20,7 @@ public class RahulAmanGeneticPlayer implements PokerSquaresPlayer {
 
     //Data structure to save best-fit child from each generation
     private final HashMap<Card, Integer> bestChildMap = new HashMap<>();
+    private final HashMap<Card, Integer> modifiedBestChildMap = new HashMap<>();
 
     //Keeps track of best child over all the generations
     private Card[][] bestChild;
@@ -31,6 +32,7 @@ public class RahulAmanGeneticPlayer implements PokerSquaresPlayer {
     private int bestGeneration = 0;
 
     private HashMap<Integer, Boolean> unfilledGridPositions = new HashMap<>();
+    private int[][] unfilledGrid = new int[SIZE][SIZE];
 
     private static boolean verboseLogging = false;
 
@@ -41,7 +43,7 @@ public class RahulAmanGeneticPlayer implements PokerSquaresPlayer {
     private static final float INITIAL_MUTATION_RATE = 0.15f;
     private static final float INCREASE_MUTATION_RATE = 1.25f;
     private static final float MAX_MUTATION_RATE = 0.8f;
-    private static final float TIMEOUT = 5 * 1000;
+    private static final float TIMEOUT = 25 * 1000;
 
     /* (non-Javadoc)
      * @see PokerSquaresPlayer#setPointSystem(PokerSquaresPointSystem, long)
@@ -61,8 +63,9 @@ public class RahulAmanGeneticPlayer implements PokerSquaresPlayer {
         for (int row = 0; row < SIZE; row++) {
             for (int col = 0; col < SIZE; col++) {
                 grid[row][col] = null;
+                unfilledGrid[row][col] = 0;
                 unfilledGridPositions.put(row*SIZE + col, false);
-                System.out.println(""+(row*SIZE + col)+":"+unfilledGridPositions.get(row*SIZE + col));
+//                System.out.println(""+(row*SIZE + col)+":"+unfilledGridPositions.get(row*SIZE + col));
             }
         }
 
@@ -74,6 +77,8 @@ public class RahulAmanGeneticPlayer implements PokerSquaresPlayer {
         bestScore = 0;
         bestGeneration = 0;
     }
+
+    private int turn = 0;
 
     @Override
     public int[] getPlay(Card card, long millisRemaining) {
@@ -87,34 +92,26 @@ public class RahulAmanGeneticPlayer implements PokerSquaresPlayer {
                 deck.push(c);
             Random random = new Random();
             Collections.shuffle(deck, random);
+            deck.remove(card);
+            deck.push(card);
 
             Card[][] cards = new Card[SIZE][SIZE];
             cards[0][0] = card;
             for(int i = 0; i<SIZE; i++) {
                 for(int j = 0; j<SIZE; j++) {
-                    if(i == 0 && j == 0) {
-                        continue;
-                    }
                     cards[i][j] = deck.pop();
-                    System.out.println(cards[i][j]);
                 }
             }
 
-            System.out.println("Generating population");
             RahulAmanPopulation population = new RahulAmanPopulation(POPULATION_COUNT, INITIAL_MUTATION_RATE, cards);
-            System.out.println("Generating population done");
             while(System.currentTimeMillis() - startMillis < TIMEOUT) {
                 generations++;
 
-//                System.out.println("Calculating fitness");
                 //Calculating fitness of all the children in current population
                 population.calculateFitness(pokerSquaresPointSystem);
-//                System.out.println("Calculating fitness done");
 
-//                System.out.println("Generating new population");
                 //Generates new population after perfroming cross-over and mutation
                 population.generate();
-//                System.out.println("Generating new population");
 
                 //Get index of best fit child in current population
                 int index = population.getBestFit(pokerSquaresPointSystem);
@@ -151,21 +148,9 @@ public class RahulAmanGeneticPlayer implements PokerSquaresPlayer {
             }
         }
 
-        //Return grid position from best fit child
-        Integer rowMajorPos = bestChildMap.get(card);
-
-        if(rowMajorPos == null) {
-            rowMajorPos = getUnfilledPosition();
-            unfilledPos++;
-        }
-
-        unfilledGridPositions.put(rowMajorPos, true);
-
-//        for(int key : unfilledGridPositions.keySet()) {
-//            System.out.println("key: "+key + " value: "+unfilledGridPositions.get(key));
-//        }
-
-        System.out.println("Card: "+card+ "  value: "+rowMajorPos+" row: "+(rowMajorPos / 5) + " col:"+ rowMajorPos % 5 + " unfilled: "+unfilledPos);
+        int rowMajorPos = getCardPosition(card);
+        System.out.println(turn);
+        turn++;
         return new int[]{rowMajorPos / 5, rowMajorPos % 5};
     }
 
@@ -251,22 +236,41 @@ public class RahulAmanGeneticPlayer implements PokerSquaresPlayer {
      */
     private void saveBestChild(Card[][] child) {
         bestChildMap.clear();
+        modifiedBestChildMap.clear();
         for(int i = 0; i < PokerSquares.SIZE; i++) {
             for(int j = 0; j < PokerSquares.SIZE; j++) {
                 bestChildMap.put(child[i][j], i * SIZE + j);
+                modifiedBestChildMap.put(child[i][j], i * SIZE + j);
             }
         }
     }
 
 
-    private int getUnfilledPosition() {
-        for(int key : unfilledGridPositions.keySet()) {
-//            System.out.println("key: "+key + " value: "+unfilledGridPositions.get(key));
-            if(!unfilledGridPositions.get(key)) {
-                return key;
+    private int getCardPosition(Card card) {
+
+        for(Card savedCard : modifiedBestChildMap.keySet()) {
+            if(savedCard == card) {
+                unfilledGridPositions.put(modifiedBestChildMap.get(savedCard), true);
+                return modifiedBestChildMap.get(savedCard);
             }
         }
+
+        for(int newPos = 0 ; newPos < SIZE*SIZE; newPos++) {
+            if(!unfilledGridPositions.get(newPos)) {
+                for(Card savedCard : modifiedBestChildMap.keySet()) {
+                    int pos = modifiedBestChildMap.get(savedCard);
+                    if(pos == newPos) {
+                        modifiedBestChildMap.remove(savedCard);
+                        modifiedBestChildMap.put(card, pos);
+                        unfilledGridPositions.put(pos, true);
+                        return pos;
+                    }
+                }
+            }
+        }
+
         return -1;
+
     }
 
     /* (non-Javadoc)
